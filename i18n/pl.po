@@ -1,0 +1,300 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* mj_rcp_repair
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-08 11:36+0000\n"
+"PO-Revision-Date: 2026-10-08 11:36+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_rcp_repair.py:0
+#, python-format
+msgid ""
+"%s line(s) still carry the productive rate after the rebuild - nothing was "
+"kept."
+msgstr ""
+"%s linii nadal ma stawkę produktywną po przeliczeniu — nic nie zostało "
+"zapisane."
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__preflight
+msgid "0. Preflight - blockers"
+msgstr "0. Kontrola wstępna — blokery"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__audit
+msgid "1. Audit - what is wrong and how much"
+msgstr "1. Audyt — co jest nie tak i za ile"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__orphans
+msgid "10. Ledger: reverse duplicates of deleted lines"
+msgstr "10. Księga: wystornuj duplikaty skasowanych linii"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__redate
+msgid "11. Ledger: date reversals on their originals"
+msgstr "11. Księga: przedatuj storna na daty oryginałów"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__link
+msgid "12. Ledger: attach timesheets missing from posted lines"
+msgstr "12. Księga: podepnij karty pracy brakujące w zaksięgowanych liniach"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__retry
+msgid "13. Ledger: retry lines in error"
+msgstr "13. Księga: ponów księgowanie linii w błędzie"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__reconcile
+msgid "14. Ledger: reconcile RCP against the ledger"
+msgstr "14. Księga: uzgodnij RCP z księgą"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__status
+msgid "2. Repair line statuses"
+msgstr "2. Naprawa statusów linii"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__reverse
+msgid "3. Reverse the wage postings"
+msgstr "3. Storno księgowań płacowych"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__mirror
+msgid "4. Cancel rows with no RCP line"
+msgstr "4. Wycofanie wierszy bez linii RCP"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__simulate
+msgid "5. Simulate the recompute (always rolled back)"
+msgstr "5. Symulacja przeliczenia (zawsze wycofywana)"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__overheads
+msgid "6. Rebuild and post the overheads"
+msgstr "6. Odbudowa i księgowanie zasileń"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__reprice
+msgid "7. Reprice lines stuck at the productive rate"
+msgstr "7. Przecena linii ze stawką produktywną"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__verify
+msgid "8. Verify"
+msgstr "8. Weryfikacja"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields.selection,name:mj_rcp_repair.selection__mj_rcp_repair__step__pairs
+msgid "9. Ledger: give one-sided postings their other half"
+msgstr "9. Księga: odtwórz brakującą stronę jednostronnych księgowań"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid ""
+"<strong>Take a database backup first.</strong>\n"
+"                    The repair reverses analytic postings and reposts\n"
+"                    overheads. It decides its own scope - there is nothing\n"
+"                    to fill in. Use Preview to see what it would do without\n"
+"                    keeping anything."
+msgstr ""
+"<strong>Najpierw zrób kopię bazy.</strong>\n"
+"                    Naprawa stornuje księgowania analityczne i księguje\n"
+"                    zasilenia na nowo. Sama ustala zakres — nie ma nic do\n"
+"                    wypełnienia. Użyj „Podgląd”, żeby zobaczyć, co zrobi,\n"
+"                    bez zapisywania czegokolwiek."
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_rcp_repair.py:0
+#, python-format
+msgid ""
+"A wage was posted or a line failed - nothing was kept. %(wages)s wage "
+"line(s), %(failed)s failed line(s)."
+msgstr ""
+"Powstała linia płacowa albo księgowanie się nie powiodło — nic nie zostało "
+"zapisane. Linie płacowe: %(wages)s, błędne linie: %(failed)s."
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,help:mj_rcp_repair.field_mj_rcp_repair__mpk
+msgid ""
+"Analytic codes separated by commas, e.g. 26-0142. Steps 3, 5, 6 and 7 work "
+"on whole RCP weeks, so they refuse to run without a limit: an unnarrowed run"
+" touches every week any non-absorbing project appears in."
+msgstr ""
+"Kody analityczne po przecinku, np. 26-0142. Kroki 3, 5, 6 i 7 pracują na "
+"całych tygodniach RCP, więc bez ograniczenia odmawiają uruchomienia: "
+"nieograniczony przebieg obejmie każdy tydzień, w którym pojawia się "
+"jakikolwiek projekt nieabsorbujący."
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "Close"
+msgstr "Zamknij"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__company_id
+msgid "Company"
+msgstr "Firma"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__create_uid
+msgid "Created by"
+msgstr "Utworzone przez"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__create_date
+msgid "Created on"
+msgstr "Utworzono"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__display_name
+msgid "Display Name"
+msgstr "Nazwa wyświetlana"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__id
+msgid "ID"
+msgstr "ID"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__write_uid
+msgid "Last Updated by"
+msgstr "Ostatnio zmienione przez"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__write_date
+msgid "Last Updated on"
+msgstr "Ostatnia zmiana"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,help:mj_rcp_repair.field_mj_rcp_repair__apply_changes
+msgid ""
+"Leave this off first and read the report. With it off nothing is kept, "
+"whatever the step does."
+msgstr ""
+"Najpierw zostaw wyłączone i przeczytaj raport. Przy wyłączonym nic nie "
+"zostaje zapisane, niezależnie od tego, co robi krok."
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__mpk
+msgid "Limit to MPK"
+msgstr "Ogranicz do MPK"
+
+#. module: mj_rcp_repair
+#: model:ir.actions.act_window,name:mj_rcp_repair.action_mj_rcp_repair
+#: model:ir.ui.menu,name:mj_rcp_repair.menu_mj_rcp_repair
+msgid "MJ RCP Repair"
+msgstr "MJ Naprawa RCP"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_rcp_repair.py:0
+#, python-format
+msgid "Offers - %s"
+msgstr "Ofertowanie - %s"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "One step at a time"
+msgstr "Pojedyncze kroki"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "Preview"
+msgstr "Podgląd"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "RCP Repair"
+msgstr "Naprawa RCP"
+
+#. module: mj_rcp_repair
+#: model:ir.model,name:mj_rcp_repair.model_mj_rcp_repair
+msgid "RCP Repair (one-off)"
+msgstr "Naprawa RCP (jednorazowa)"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__output
+msgid "Report"
+msgstr "Raport"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__show_advanced
+msgid "Run the steps by hand"
+msgstr "Uruchom kroki ręcznie"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "Run this step"
+msgstr "Uruchom ten krok"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "Start the repair"
+msgstr "Start naprawy"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__step
+msgid "Step"
+msgstr "Krok"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,help:mj_rcp_repair.field_mj_rcp_repair__show_advanced
+msgid ""
+"The steps in the order the automatic run uses them, one at a time. Only "
+"needed to take a single project apart, or to reprice - which the automatic "
+"run deliberately leaves alone."
+msgstr ""
+"Kroki w kolejności, w jakiej używa ich przebieg automatyczny, pojedynczo. "
+"Potrzebne tylko do rozłożenia jednego projektu na czynniki albo do przeceny "
+"— której automat świadomie nie robi."
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_rcp_repair.py:0
+#, python-format
+msgid "These codes are not non-absorbing projects: %s"
+msgstr "Te kody nie są projektami nieabsorbującymi: %s"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_rcp_repair.py:0
+#, python-format
+msgid ""
+"This step works on whole RCP weeks. Fill in \"Limit to MPK\" with the "
+"projects you are repairing and run it once per project."
+msgstr ""
+"Ten krok pracuje na całych tygodniach RCP. Uzupełnij „Ogranicz do MPK” "
+"projektami, które naprawiasz, i uruchom osobno dla każdego."
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "This writes to the database. Have you taken a backup?"
+msgstr "To zapisuje do bazy danych. Czy masz kopię zapasową?"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__apply_changes
+msgid "Write the changes"
+msgstr "Zapisz zmiany"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,help:mj_rcp_repair.field_mj_rcp_repair__company_id
+msgid ""
+"hr_rcp scopes its overhead lookups by the active company, so the repair has "
+"to run once per company that has non-absorbing projects."
+msgstr ""
+"hr_rcp zawęża wyszukiwanie zasileń do aktywnej firmy, więc naprawę trzeba "
+"uruchomić osobno dla każdej firmy mającej projekty nieabsorbujące."

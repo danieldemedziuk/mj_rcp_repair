@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_mj_rcp_repair_form" model="ir.ui.view">
+        <field name="name">mj.rcp.repair.form</field>
+        <field name="model">mj.rcp.repair</field>
+        <field name="arch" type="xml">
+            <form string="RCP Repair">
+                <div class="alert alert-warning" role="alert">
+                    <strong>Take a database backup first.</strong>
+                    The repair reverses analytic postings and reposts
+                    overheads. It decides its own scope - there is nothing
+                    to fill in. Use Preview to see what it would do without
+                    keeping anything.
+                </div>
+
+                <field name="output" nolabel="1" widget="text"
+                       class="font-monospace small"
+                       invisible="not output"/>
+
+                <group>
+                    <field name="show_advanced"/>
+                </group>
+                <group invisible="not show_advanced"
+                       string="One step at a time">
+                    <group>
+                        <field name="step"/>
+                        <field name="company_id"
+                               options="{'no_create': True, 'no_open': True}"/>
+                    </group>
+                    <group>
+                        <field name="mpk" placeholder="26-0142"/>
+                        <field name="apply_changes"/>
+                    </group>
+                    <div colspan="2">
+                        <button name="action_run" type="object"
+                                string="Run this step"
+                                class="btn-secondary"/>
+                    </div>
+                </group>
+
+                <footer>
+                    <button name="action_start" type="object"
+                            string="Start the repair" class="btn-primary"
+                            confirm="This writes to the database. Have you taken a backup?"/>
+                    <button name="action_preview" type="object"
+                            string="Preview" class="btn-secondary"/>
+                    <button string="Close" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_mj_rcp_repair" model="ir.actions.act_window">
+        <field name="name">MJ RCP Repair</field>
+        <field name="res_model">mj.rcp.repair</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Under Technical, and administrators only: the repair reverses
+         analytic postings and deletes sheet lines. -->
+    <menuitem id="menu_mj_rcp_repair"
+              name="MJ RCP Repair"
+              parent="base.menu_custom"
+              action="action_mj_rcp_repair"
+              sequence="900"
+              groups="base.group_system"/>
+
+</odoo>
