@@ -85,6 +85,7 @@ OFFER_PROJECTS = {
     '26-0074': 'JR001',     # Janusz Rudnicki
     '26-0084': 'MI001',     # Marek Ilnicki
     '26-0137': 'KB003',     # Konrad Bąkowski
+    '26-0172': 'SD001',     # Szymon Dolata
 }
 # Projects that book straight on their cost centre's account: the general
 # offer project (sales support books there when idle) and the year's service
