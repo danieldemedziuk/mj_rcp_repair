@@ -138,3 +138,57 @@ autokorekta tylko ręczne `unproductive`. Odznaczenie go na projekcie
 autokorekty przepuści płacę na konto `E-` bez ostrzeżenia i automat tego nie
 wykryje. Łatka (kategoria „Poprawki i korekty" jako drugi sygnał) jest
 zaprojektowana, nie wdrożona.
+
+---
+
+## RCP 2025 — księgowanie wstecz (od 17.0.1.17.0)
+
+Osobny przycisk, **nie** część „Start naprawy”. Wymaga `sync_hub` ≥ 17.0.9.16.0
+(odczyt płac z NAV) i działającego połączenia NAV oraz Enterprise.
+
+1. Kopia bazy (pkt 1).
+2. Wgraj `sync_hub` i `mj_rcp_repair`, potem `-u sync_hub,mj_rcp_repair`.
+3. *MJ Naprawa RCP* → **Preview RCP 2025** — przeczytaj raport.
+4. **Post RCP 2025** — trwa kilkanaście minut, nie zamykaj okna.
+
+Co robi, po kolei:
+
+- narzut B „godziny pracy przy ofertach” w modelach kosztów, który przez
+  scalenie 26-0084 (17.11.2026) wskazywał konto osobiste handlowca, wraca na
+  konto **A038**;
+- dwa wiersze jednej osoby w jednym miesiącu modelu kosztów 2025: zostaje
+  ten, którego płacę bazową potwierdza najbliższy późniejszy miesiąc; czego
+  nie da się rozstrzygnąć — raport `UNRESOLVED`, nic nie jest kasowane;
+- konto `A038-E-PT001-PTOMASZEWSKA` (zarchiwizowane), jeśli go brak;
+- płace: **I–VI 2025 z NAV** (konto 550-00, pracownik po kodzie E w wymiarze 1,
+  przy innym numerze — po nazwisku), **VII–XII z Enterprise**; opis linii z NAV:
+  `NAV <dokument> | <opis NAV> | <kod NAV>`, referencja `NAV 550-00 #<nr zapisu>`;
+- MPK `24-0064-T` → `24-0064`;
+- każdy tydzień 2025: przecena wg dzisiejszego modelu kosztów miesiąca,
+  przeliczenie, księgowanie, blokada. Tydzień, którego nie da się zaksięgować,
+  jest wycofywany w całości i wypisany (`NOT POSTED`) — np. grudzień
+  Kaźmierczaka (brak wiersza w modelu XII 2025, decyzja: zostaje).
+
+Ponowne uruchomienie jest bezpieczne: płace aktualizowane po numerze zapisu
+źródłowego, tygodnie zaksięgowane i zablokowane są pomijane.
+
+**Nie robi:** budżetów projektów (`project_charter`, wiersz 210 „Robocizna”) —
+to zdjęcie odświeżane przyciskiem/cronem projektu; po księgowaniu 2025 jest
+nieaktualne na projektach z RCP 2025.
+
+---
+
+## Wyczyść okres RCP (od 17.0.1.18.0)
+
+Wymaga `hr_rcp` ≥ 17.0.0.0.35. Pola **Wyczyść od / do**, potem **Podgląd
+czyszczenia** i **Wyczyść okres**. Tygodnie wybierane są po dacie dokumentu RCP,
+w firmie wybranej w kreatorze.
+
+- odblokowuje tydzień, stornuje linie zaksięgowane **i linie w błędzie z żywymi
+  narzutami**, usuwa linie;
+- stornuje płace pozostawione przez linie usunięte wcześniej (storno jak w hr_rcp:
+  data oryginału, klucz `RCP:<linia>:REVERSE:<zapis>`);
+- raport: linie pozostałe w okresie, konta, które się nie zerują, zapisy bez pary.
+
+Linia, której nie dało się wystornować, **nie jest usuwana** — jest wypisana
+(`STILL BOOKED`). Tygodnie zostają pustymi szkicami: przelicz, potem zaksięguj.

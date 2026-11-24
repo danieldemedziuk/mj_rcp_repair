@@ -39,6 +39,42 @@
                     </div>
                 </group>
 
+                <group string="Clear an RCP period">
+                    <div colspan="2" class="text-muted">
+                        Reverses every posting of the RCP weeks in the period,
+                        lines in error included, deletes the lines and reverses
+                        wages left behind by lines deleted earlier. The weeks
+                        stay as empty drafts, ready to be recomputed.
+                    </div>
+                    <group>
+                        <field name="clean_date_from"/>
+                        <field name="clean_date_to"/>
+                    </group>
+                    <div colspan="2">
+                        <button name="action_preview_clean_period" type="object"
+                                string="Preview clearing" class="btn-secondary"/>
+                        <button name="action_clean_period" type="object"
+                                string="Clear the period" class="btn-secondary ms-2"
+                                confirm="This reverses postings and deletes RCP lines. Have you taken a backup?"/>
+                    </div>
+                </group>
+
+                <group string="RCP 2025">
+                    <div colspan="2" class="text-muted">
+                        Pays January-June 2025 from NAV and July-December from
+                        Enterprise onto the employee accounts, reprices every
+                        2025 week by the current cost model and posts and
+                        locks it. Weeks already posted are left alone.
+                    </div>
+                    <div colspan="2">
+                        <button name="action_preview_2025" type="object"
+                                string="Preview RCP 2025" class="btn-secondary"/>
+                        <button name="action_post_2025" type="object"
+                                string="Post RCP 2025" class="btn-secondary ms-2"
+                                confirm="This writes to the database. Have you taken a backup?"/>
+                    </div>
+                </group>
+
                 <footer>
                     <button name="action_start" type="object"
                             string="Start the repair" class="btn-primary"

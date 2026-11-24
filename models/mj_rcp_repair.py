@@ -129,6 +129,23 @@ SYNC_COMPANY_ID = 1
 SYNC_DATE_FROM = date(2026, 1, 1)
 SALARY_SYNC_KEY = 'account.move.line.salary_cost'
 
+# The 2025 RCP year, posted after the fact (decision of 23.11.2026): pay
+# from Enterprise from July 2025 on and from NAV before it, rates from the
+# cost model of each month as it stands now, onto every project.
+YEAR_2025 = (date(2025, 1, 1), date(2025, 12, 31))
+# A sales assistant paid in 2025 who had no account in CE (archived, like
+# the accounts of everybody else in sales who left).
+SALES_ACCOUNTS_2025 = {'PT001': 'A038-E-PT001-PTOMASZEWSKA'}
+# A project code from before the 2026 renumbering, still on 2025 sheets.
+STALE_MPK_2025 = {'24-0064-T': '24-0064'}
+# The offer-hours overhead (B, "godziny pracy przy ofertach") funded the
+# sales department's general account. That account became Marek Ilnicki's
+# offer project 26-0084 and was merged into his own account on 17.11.2026,
+# taking the cost model's references with it - 104.5 k PLN of 2025
+# overhead would land on one salesman.
+OFFER_OVERHEAD_CENTRE = 'A038'
+OFFER_OVERHEAD_LABEL = '%ofert%'
+
 
 def _version_tuple(version):
     """'17.0.1.2.10' -> (17, 0, 1, 2, 10), so versions compare as numbers."""
@@ -181,6 +198,11 @@ class MjRcpRepair(models.TransientModel):
              "so the repair has to run once per company that has "
              "non-absorbing projects.")
     output = fields.Text(string='Report', readonly=True)
+    clean_date_from = fields.Date(
+        string='Clean from',
+        help="First day of the RCP weeks to clear: every posting reversed "
+             "and every line deleted.")
+    clean_date_to = fields.Date(string='Clean to')
     show_advanced = fields.Boolean(
         string='Run the steps by hand',
         help="The steps in the order the automatic run uses them, one at "
@@ -2259,6 +2281,352 @@ class MjRcpRepair(models.TransientModel):
             log("Repricing deletes and rebuilds them. Use step 7 by hand, "
                 "one project at a time, once somebody has agreed the scope.")
 
+    # ------------------------------------------------------------------
+    # RCP 2025 - posted after the fact
+    # ------------------------------------------------------------------
+    def _offer_overhead_on_person_accounts(self):
+        """Cost model B lines of the offer-hours overhead that point at a
+        person's account, with the centre account they belong on."""
+        centre = self.env['account.analytic.account'].search(
+            [('code', '=', OFFER_OVERHEAD_CENTRE)], limit=1)
+        person_ids = self._person_account_ids() | set(
+            self.env['account.analytic.account'].sudo().with_context(active_test=False)
+            .search([('code', '=like', 'A___-E-%')]).ids)
+        found = []
+        for index in range(1, 10):
+            model = 'cmp_costs_b%d.lines' % index
+            if model not in self.env:
+                continue
+            lines = self.env[model].sudo().search([
+                ('description', '=ilike', OFFER_OVERHEAD_LABEL),
+                ('acc_num', 'in', list(person_ids)),
+            ])
+            if lines:
+                found.append((model, lines))
+        return centre, found
+
+    def _duplicate_cost_rows_2025(self, log):
+        """Two personnel-cost rows of one employee in one 2025 month: the
+        rate lookup needs exactly one and stops the whole week otherwise.
+        The row kept is the one whose base pay the nearest later month
+        without a duplicate confirms; anything less certain is reported."""
+        Line = self.env['cmp_personnel_costs.line'].sudo()
+        date_from, date_to = YEAR_2025
+        rows = Line.search([
+            ('personnel_id.date_month', '>=', date_from),
+            ('personnel_id.date_month', '<=', date_to),
+        ])
+        groups = {}
+        for row in rows:
+            groups.setdefault((row.personnel_id, row.employee), Line)
+            groups[(row.personnel_id, row.employee)] |= row
+        doubled = {key: group for key, group in groups.items() if len(group) > 1}
+        drop = Line
+        for (model, employee), group in sorted(
+                doubled.items(), key=lambda item: item[0][0].date_month):
+            later = Line.search([
+                ('employee', '=', employee.id),
+                ('personnel_id.company_id', '=', model.company_id.id),
+                ('personnel_id.date_month', '>', model.date_month),
+            ], order='id').sorted(lambda row: row.personnel_id.date_month)
+            reference = next((
+                row for row in later
+                if (row.personnel_id, row.employee) not in doubled), None)
+            keep = reference and group.filtered(
+                lambda row: abs(row.basis_rem - reference.basis_rem) < 0.005)
+            label = "%s %s: rows %s (base %s)" % (
+                model.date_month.strftime('%Y-%m'), employee.name, group.ids,
+                ', '.join('%.2f' % b for b in group.mapped('basis_rem')))
+            if keep and len(keep) == 1:
+                log("   %s -> keep %s, as in %s" % (
+                    label, keep.id, reference.personnel_id.date_month.strftime('%Y-%m')))
+                drop |= group - keep
+            else:
+                log("   %s -> UNRESOLVED, fix the cost model by hand" % label)
+        if drop:
+            drop.unlink()
+        return len(drop)
+
+    def _step_rcp_2025(self, log):
+        """Pay in, rates set, every 2025 week posted and locked.
+
+        Safe to run again: payroll is upserted by its source entry, a week
+        already posted and locked is left alone, a week that cannot be
+        posted is rolled back on its own and reported.
+        """
+        date_from, date_to = YEAR_2025
+        company = self.env.company
+        Account = self.env['account.analytic.account'].sudo().with_context(active_test=False)
+        Employee = self.env['hr.employee'].sudo().with_context(active_test=False)
+        Service = self.env['sync.employee.cost'].sudo()
+        if not hasattr(Service, 'sync_salary_lines_from_nav'):
+            raise UserError(_("Update sync_hub to 17.0.9.16.0 first: it reads the "
+                              "2025 payroll from NAV."))
+
+        log("2025  cost model: offer-hours overhead on a person's account")
+        centre, found = self._offer_overhead_on_person_accounts()
+        if found and not centre:
+            raise UserError(_("No %s account to move the offer-hours overhead to.")
+                            % OFFER_OVERHEAD_CENTRE)
+        for model, lines in found:
+            log("   %s: %d line(s) %s -> %s" % (
+                model, len(lines), ', '.join(sorted(set(lines.mapped('acc_num.code')))),
+                centre.code))
+            lines.write({'acc_num': centre.id})
+        if not found:
+            log("   none")
+
+        log("2025  cost model: two rows for one employee in one month")
+        if not self._duplicate_cost_rows_2025(log):
+            log("   none removed")
+
+        log("2025  sales accounts missing in CE")
+        for identifier, code in SALES_ACCOUNTS_2025.items():
+            employee = Employee.search([('unique_identifier', '=', identifier)])
+            if len(employee) != 1 or employee.account_id:
+                continue
+            account = Account.search([('code', '=', code)], limit=1)
+            if not account:
+                template = Account.search(
+                    [('code', '=like', OFFER_OVERHEAD_CENTRE + '-E-%')], limit=1)
+                account = Account.create({
+                    'name': 'Ofertowanie - %s' % employee.name, 'code': code,
+                    'plan_id': template.plan_id.id, 'company_id': SYNC_COMPANY_ID,
+                    'active': False})
+            employee.account_id = account
+            log("   %s -> %s (archived)" % (employee.name, code))
+
+        log("2025  payroll")
+        for title, method, period in (
+                ("NAV, until June", 'sync_salary_lines_from_nav',
+                 (date_from, Service.NAV_PAYROLL_END)),
+                ("Enterprise, from July", 'sync_salary_lines',
+                 (Service.NAV_PAYROLL_END + relativedelta(days=1), date_to))):
+            try:
+                with self.env.cr.savepoint():
+                    result = getattr(Service, method)(
+                        company_id=SYNC_COMPANY_ID, date_from=period[0], date_to=period[1])
+            except UserError as error:
+                raise UserError(_("Payroll from %(source)s could not be read, nothing "
+                                  "was posted: %(error)s", source=title, error=error))
+            log("   %s: found %s, created %s, updated %s, skipped %s, failed %s" % (
+                title, result['records_found'], result['created'], result['updated'],
+                result['skipped'], result['failed']))
+            for detail in result.get('details', [])[:20]:
+                if 'NAV' in detail or not detail.startswith(("Skipped source ID", "Pominięto identyfikator")):
+                    log("      %s" % detail)
+
+        documents = self.env['hr.rcp'].search([
+            ('company_id', '=', company.id),
+            ('date', '>=', date_from), ('date', '<=', date_to),
+        ]).sorted('date')
+        lines = documents.rcp_lines.filtered(lambda line: line.status == 'new')
+        for old, new in STALE_MPK_2025.items():
+            stale = lines.filtered(lambda line: line.mpk == old)
+            if stale:
+                stale.write({'mpk': new})
+                log("2025  MPK %s -> %s: %d line(s)" % (old, new, len(stale)))
+
+        log("2025  weeks")
+        Personnel = self.env['cmp_personnel_costs.model']
+        Project = self.env['project.project'].with_context(active_test=False)
+        before = after = 0.0
+        posted = failed = 0
+        for document in documents:
+            if document.locked and document.stage == 'posted':
+                continue
+            try:
+                with self.env.cr.savepoint():
+                    if document.locked:
+                        document.action_unlock()
+                    personnel = Personnel.search([
+                        ('date_month', '=', document.date.replace(day=1)),
+                        ('company_id', '=', company.id)], limit=1)
+                    for line in document.rcp_lines.filtered(
+                            lambda l: l.status == 'new' and l.quantity):
+                        before += line.quantity * line.unit_cost
+                        project = Project._search_by_project_code(line.mpk)
+                        rate = document._rcp_unit_cost(
+                            line.description, project if len(project) == 1 else Project.browse(),
+                            personnel)
+                        if abs((line.unit_cost or 0.0) - rate) > 0.004:
+                            line.unit_cost = rate
+                    document.action_get_analytic_lines()
+                    new = document.rcp_lines.filtered(lambda l: l.status == 'new')
+                    after += sum(l.quantity * l.unit_cost for l in new)
+                    document._action_post_to_analytic_sync(line_ids=new.ids)
+                    left = document.rcp_lines.filtered(lambda l: l.status in ('new', 'error'))
+                    if left:
+                        raise UserError("; ".join(
+                            "%s %s: %s" % (l.description.name or '/', l.mpk,
+                                           (l.analytic_last_error or l.status)[:120])
+                            for l in left[:5]))
+                    document.action_lock()
+                posted += 1
+                log("   %s %s: %d line(s), %.2f h" % (
+                    document.display_name, document.date, len(new),
+                    sum(new.mapped('quantity'))))
+            except UserError as error:
+                failed += 1
+                log("   %s %s: NOT POSTED - %s" % (
+                    document.display_name, document.date, error))
+        log("   posted %d week(s), %d not; value %.2f -> %.2f after repricing" % (
+            posted, failed, before, after))
+
+        self.env.flush_all()
+        self.env.cr.execute("""
+            SELECT l.status, count(*), coalesce(sum(l.quantity * l.unit_cost), 0)
+              FROM hr_rcp_lines l JOIN hr_rcp r ON r.id = l.rcp_id
+             WHERE r.company_id = %s AND r.date BETWEEN %s AND %s
+             GROUP BY 1 ORDER BY 1""", (company.id, date_from, date_to))
+        log("2025  lines: %s" % ', '.join(
+            '%s %d (%.2f)' % row for row in self.env.cr.fetchall()))
+        self.env.cr.execute("""
+            SELECT count(*) FROM account_analytic_line
+             WHERE rcp_move_key LIKE 'RCP:%%' AND transfer_pair_id IS NULL""")
+        log("2025  ledger rows without their pair: %d" % self.env.cr.fetchone()[0])
+        self.env.cr.execute("""
+            SELECT to_char(date, 'YYYY-MM'), sum(-amount) FROM account_analytic_line
+             WHERE posting_origin = 'payroll' AND date BETWEEN %s AND %s
+             GROUP BY 1 ORDER BY 1""", (date_from, date_to))
+        log("2025  payroll by month: %s" % ', '.join(
+            '%s %.2f' % row for row in self.env.cr.fetchall()))
+
+    # ------------------------------------------------------------------
+    # Clear an RCP period - reverse everything, delete the lines
+    # ------------------------------------------------------------------
+    def _orphan_wage_postings(self, date_from, date_to):
+        """Wage transfers still booked whose RCP line was deleted.
+
+        Deleting a line clears nothing in the ledger. hr_rcp refuses it
+        while the line is booked, but lines deleted before that guard (or
+        whose posting was never linked back) left their wage behind.
+        """
+        self.env.flush_all()
+        self.env.cr.execute("""
+            SELECT a.id FROM account_analytic_line a
+             WHERE a.rcp_move_key ~ '^RCP:[0-9]+:POST$'
+               AND a.date BETWEEN %s AND %s AND a.amount <> 0
+               AND a.company_id = %s
+               AND NOT EXISTS (SELECT 1 FROM hr_rcp_lines l
+                                WHERE l.id = split_part(a.rcp_move_key, ':', 2)::int)
+               AND NOT EXISTS (SELECT 1 FROM account_analytic_line r
+                                WHERE r.rcp_move_key LIKE split_part(a.rcp_move_key, ':', 1)
+                                      || ':' || split_part(a.rcp_move_key, ':', 2) || ':REVERSE%%')
+        """, (date_from, date_to, self.env.company.id))
+        return self.env['account.analytic.line'].sudo().browse(
+            [row[0] for row in self.env.cr.fetchall()])
+
+    def _reverse_orphan_wage(self, posted):
+        """The storno hr_rcp would write (`_reverse_single_rcp_line`):
+        dated on the original, accounts swapped, the same key shape."""
+        line_id = posted.rcp_move_key.split(':')[1]
+        return self.env['account.analytic.line'].sudo().with_context(
+            allow_transfer_document_posting=True).create({
+                'name': 'Storno: %s' % posted.name,
+                'date': posted.date,
+                'amount': -abs(posted.amount),
+                'unit_amount': 0.0,
+                'employee_id': posted.employee_id.id,
+                'account_id': posted.destination_account_id.id,
+                'destination_account_id': posted.account_id.id,
+                'partner_id': posted.partner_id.id,
+                'company_id': posted.company_id.id,
+                'user_id': self.env.uid,
+                'rcp_operation_type': 'reverse',
+                'rcp_move_key': 'RCP:%s:REVERSE:%s' % (line_id, posted.id),
+                'rcp_reverse_of_id': posted.id,
+                'posting_origin': 'labor_absorption',
+            })
+
+    def _step_clean_period(self, log):
+        """Every RCP week of the period back to an empty draft, the
+        ledger netting to zero on every account it touched."""
+        date_from, date_to = self.clean_date_from, self.clean_date_to
+        if not date_from or not date_to or date_from > date_to:
+            raise UserError(_("Give the period to clean: from and to."))
+        Rcp = self.env['hr.rcp']
+        if not hasattr(Rcp, '_lines_to_reverse'):
+            raise UserError(_("Update hr_rcp to 17.0.0.0.35 first: older versions "
+                              "cannot reverse lines in error."))
+        documents = Rcp.search([
+            ('company_id', '=', self.env.company.id),
+            ('date', '>=', date_from), ('date', '<=', date_to),
+        ]).sorted('date')
+        log("period %s - %s: %d week document(s)" % (date_from, date_to, len(documents)))
+
+        reversed_total = deleted_total = 0
+        for document in documents:
+            to_reverse = document._lines_to_reverse()
+            if not document.rcp_lines:
+                continue
+            if document.locked:
+                document.action_unlock()
+            result = document._action_reverse_analytic_sync() if to_reverse else {
+                'reversed_count': 0, 'error_count': 0}
+            # Whatever the reversal could not take is still booked: kept,
+            # and reported, rather than deleted with its money in the ledger.
+            stuck = document._lines_to_reverse()
+            removable = document.rcp_lines - stuck
+            count = len(removable)
+            removable.unlink()
+            reversed_total += result['reversed_count']
+            deleted_total += count
+            log("   %s %s: reversed %d, deleted %d line(s)%s" % (
+                document.display_name, document.date, result['reversed_count'], count,
+                ", %d STILL BOOKED - see the line errors" % len(stuck) if stuck else ""))
+
+        orphans = self._orphan_wage_postings(date_from, date_to)
+        for posted in orphans:
+            self._reverse_orphan_wage(posted)
+            log("   storno of a deleted line's wage: %s %s %.2f" % (
+                posted.rcp_move_key, posted.account_id.code, posted.amount))
+        log("reversed %d line(s), deleted %d, %d orphan wage(s) reversed" % (
+            reversed_total, deleted_total, len(orphans)))
+
+        self.env.flush_all()
+        self.env.cr.execute("""
+            SELECT count(*) FROM hr_rcp_lines l JOIN hr_rcp r ON r.id = l.rcp_id
+             WHERE r.company_id = %s AND r.date BETWEEN %s AND %s""",
+            (self.env.company.id, date_from, date_to))
+        log("lines left in the period: %d" % self.env.cr.fetchone()[0])
+        self.env.cr.execute("""
+            SELECT aa.code, sum(x.amount) FROM account_analytic_line x
+              JOIN account_analytic_account aa ON aa.id = x.account_id
+             WHERE x.id IN (
+                   SELECT id FROM account_analytic_line
+                    WHERE rcp_move_key LIKE 'RCP:%%' AND date BETWEEN %s AND %s
+                      AND company_id = %s
+                   UNION
+                   SELECT transfer_pair_id FROM account_analytic_line
+                    WHERE rcp_move_key LIKE 'RCP:%%' AND date BETWEEN %s AND %s
+                      AND company_id = %s)
+             GROUP BY 1 HAVING abs(sum(x.amount)) > 0.005 ORDER BY 1""",
+            (date_from, date_to, self.env.company.id) * 2)
+        open_accounts = self.env.cr.fetchall()
+        log("accounts not netting to zero: %s" % (
+            ', '.join('%s %.2f' % row for row in open_accounts) or 'none'))
+        self.env.cr.execute("""
+            SELECT count(*) FROM account_analytic_line
+             WHERE rcp_move_key LIKE 'RCP:%%' AND transfer_pair_id IS NULL""")
+        log("ledger rows without their pair: %d" % self.env.cr.fetchone()[0])
+
+    def action_clean_period(self):
+        """Clear the chosen RCP period."""
+        return self._execute(auto=False, write=True, runner='_step_clean_period')
+
+    def action_preview_clean_period(self):
+        """The same clearing, with nothing kept."""
+        return self._execute(auto=False, write=False, runner='_step_clean_period')
+
+    def action_post_2025(self):
+        """Post the 2025 RCP year."""
+        return self._execute(auto=False, write=True, runner='_step_rcp_2025')
+
+    def action_preview_2025(self):
+        """The 2025 posting, with nothing kept."""
+        return self._execute(auto=False, write=False, runner='_step_rcp_2025')
+
     def action_start(self):
         """Start the repair. One button, no configuration."""
         return self._execute(auto=True, write=True)
@@ -2270,8 +2638,9 @@ class MjRcpRepair(models.TransientModel):
     # ------------------------------------------------------------------
     # the buttons
     # ------------------------------------------------------------------
-    def _execute(self, auto, write):
-        """Run something and show what it did.
+    def _execute(self, auto, write, runner=None):
+        """Run something and show what it did. `runner` names a step run
+        on its own, outside the automatic repair (the 2025 posting).
 
         The savepoint is what makes "read it first" real: without
         `write` it is rolled back and the report is all that survives. A
@@ -2287,7 +2656,12 @@ class MjRcpRepair(models.TransientModel):
         # An automatic run picks its own companies. hr_rcp scopes its
         # overhead lookups by the active company, so a single-company
         # run would quietly leave the other companies' overheads behind.
-        if auto:
+        if runner == '_step_rcp_2025':
+            # The year's payroll is imported for this company only.
+            companies = self.env['res.company'].browse(SYNC_COMPANY_ID)
+        elif runner:
+            companies = self.company_id
+        elif auto:
             companies = self._unproductive_projects().mapped('company_id')
             companies = companies or self.company_id
         else:
@@ -2296,7 +2670,11 @@ class MjRcpRepair(models.TransientModel):
         log("mode: %s" % ("REPAIRING" if write else "PREVIEW - nothing kept"))
         log("companies: %s"
             % ', '.join(c.display_name for c in companies))
-        if not auto:
+        if runner == '_step_rcp_2025':
+            log("scope: RCP %s" % YEAR_2025[0].year)
+        elif runner:
+            log("scope: RCP %s - %s" % (self.clean_date_from, self.clean_date_to))
+        elif not auto:
             log("scope: %s" % ((self.mpk or '').strip()
                                or "all non-absorbing projects"))
         log("=" * 58)
@@ -2310,7 +2688,9 @@ class MjRcpRepair(models.TransientModel):
                         log("#" * 58)
                         log("# %s" % company.display_name)
                         log("#" * 58)
-                    if auto:
+                    if runner:
+                        getattr(wizard, runner)(log)
+                    elif auto:
                         wizard._run_auto(log, write)
                     else:
                         getattr(wizard, '_step_%s' % self.step)(log)

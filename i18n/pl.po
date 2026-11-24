@@ -298,3 +298,122 @@ msgid ""
 msgstr ""
 "hr_rcp zawęża wyszukiwanie zasileń do aktywnej firmy, więc naprawę trzeba "
 "uruchomić osobno dla każdej firmy mającej projekty nieabsorbujące."
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_rcp_repair.py:0
+msgid ""
+"Update sync_hub to 17.0.9.16.0 first: it reads the 2025 payroll from NAV."
+msgstr ""
+"Najpierw zaktualizuj sync_hub do 17.0.9.16.0: to on odczytuje płace 2025 z "
+"NAV."
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_rcp_repair.py:0
+msgid "No %s account to move the offer-hours overhead to."
+msgstr "Brak konta %s, na które można przenieść narzut godzin ofertowych."
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_rcp_repair.py:0
+msgid ""
+"Payroll from %(source)s could not be read, nothing was posted: %(error)s"
+msgstr ""
+"Nie udało się odczytać płac z %(source)s, nic nie zaksięgowano: %(error)s"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "RCP 2025"
+msgstr "RCP 2025"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "Preview RCP 2025"
+msgstr "Podgląd RCP 2025"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "Post RCP 2025"
+msgstr "Zaksięguj RCP 2025"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid ""
+"Pays January-June 2025 from NAV and July-December from\n"
+"                        Enterprise onto the employee accounts, reprices every\n"
+"                        2025 week by the current cost model and posts and\n"
+"                        locks it. Weeks already posted are left alone."
+msgstr ""
+"Wprowadza płace za styczeń–czerwiec 2025 z NAV i lipiec–grudzień z "
+"Enterprise na konta pracowników, przecenia każdy tydzień 2025 według "
+"obecnego modelu kosztów, księguje go i blokuje. Tygodnie już zaksięgowane "
+"są pomijane."
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_rcp_repair.py:0
+msgid "Give the period to clean: from and to."
+msgstr "Podaj okres do wyczyszczenia: od i do."
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_rcp_repair.py:0
+msgid ""
+"Update hr_rcp to 17.0.0.0.35 first: older versions cannot reverse lines in "
+"error."
+msgstr ""
+"Najpierw zaktualizuj hr_rcp do 17.0.0.0.35: starsze wersje nie potrafią "
+"wystornować linii w błędzie."
+
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__clean_date_from
+msgid "Clean from"
+msgstr "Wyczyść od"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_rcp_repair__clean_date_to
+msgid "Clean to"
+msgstr "Wyczyść do"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "Clear an RCP period"
+msgstr "Wyczyść okres RCP"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "Clear the period"
+msgstr "Wyczyść okres"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,help:mj_rcp_repair.field_mj_rcp_repair__clean_date_from
+msgid ""
+"First day of the RCP weeks to clear: every posting reversed and every line "
+"deleted."
+msgstr ""
+"Pierwszy dzień tygodni RCP do wyczyszczenia: każde księgowanie zostanie "
+"wystornowane, a każda linia usunięta."
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "Preview clearing"
+msgstr "Podgląd czyszczenia"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid ""
+"Reverses every posting of the RCP weeks in the period,\n"
+"                        lines in error included, deletes the lines and reverses\n"
+"                        wages left behind by lines deleted earlier. The weeks\n"
+"                        stay as empty drafts, ready to be recomputed."
+msgstr ""
+"Stornuje wszystkie księgowania tygodni RCP z okresu, także linii w błędzie, "
+"usuwa linie i stornuje płace pozostawione przez linie usunięte wcześniej. "
+"Tygodnie zostają pustymi szkicami, gotowymi do przeliczenia."
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
+msgid "This reverses postings and deletes RCP lines. Have you taken a backup?"
+msgstr "To stornuje księgowania i usuwa linie RCP. Czy masz kopię bazy?"
