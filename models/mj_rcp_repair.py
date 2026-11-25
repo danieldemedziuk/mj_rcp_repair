@@ -69,7 +69,15 @@ REQUIRED_VERSIONS = {
 # folded into their Axxx-E-<code> account. A038 (sales, 06.10.2026) and
 # A012 (project management, 14.10.2026). The first entry is where a missing
 # offer-project account is created.
-MERGED_COST_CENTRES = ('A038', 'A012')
+MERGED_COST_CENTRES = ('A038', 'A012', 'A056')
+# Cost centres run by one person, whose centre account becomes that person's
+# only account (decision of 25.11.2026: the technical director). The centre
+# account is recoded to Axxx-E-<E-code> - keeping its CMP pool, its history
+# and its links - and the person's E-account is then folded into it like
+# any MERGED_COST_CENTRES account. Centre code -> employee identifier.
+PERSONAL_CENTRES = {
+    'A056': 'LK001',        # Dyrektor Techniczny - Łukasz Kaźmierczak
+}
 # Cost centres whose people are not costed to projects through RCP: their
 # hours stay on the timesheets, but every 2026 posting of them is reversed
 # (decision of 14.10.2026 - project managers, A012; they are to be funded
@@ -1319,6 +1327,9 @@ class MjRcpRepair(models.TransientModel):
                 })
                 log("   created %s" % code)
 
+        for centre_code, identifier in PERSONAL_CENTRES.items():
+            self._recode_personal_centre(centre_code, identifier, log)
+
         targets = Account.search(['|'] * (len(MERGED_COST_CENTRES) - 1) + [
             ('code', '=like', '%s-E-%%' % code) for code in MERGED_COST_CENTRES], order='code')
         merged_projects = Project.browse()
@@ -1471,6 +1482,41 @@ class MjRcpRepair(models.TransientModel):
         if archived:
             log("   archived: %s" % ', '.join(archived))
         log("person accounts: %d, accounts deleted: %d" % (len(targets), deleted))
+
+    def _recode_personal_centre(self, centre_code, identifier, log):
+        """Give a one-person cost centre account the person's function code.
+
+        Enterprise books the centre under its own code until somebody
+        recodes it there too; until then the cost centre sync reports the
+        old code as unmapped and fetches it after the recode - nothing is
+        lost. A sync override is deliberately NOT created: it would send the
+        payroll onto a personal account, where the cost centre sync leaves it
+        to the payroll sync, which only reads E-/Axxx-E- codes - the pay
+        would vanish from CE.
+        """
+        Account = self.env['account.analytic.account'].sudo().with_context(active_test=False)
+        employee = self.env['hr.employee'].sudo().with_context(active_test=False).search(
+            [('unique_identifier', '=', identifier)])
+        if len(employee) != 1:
+            log("   LEFT FOR REVIEW %s: %d employees with identifier %s"
+                % (centre_code, len(employee), identifier))
+            return
+        code = employee._get_function_account_code(centre_code)
+        if Account.search_count([('code', '=', code)]):
+            return
+        centre = Account.search([('code', '=', centre_code), ('active', '=', True)])
+        if len(centre) != 1:
+            log("   LEFT FOR REVIEW %s: %d active accounts with this code"
+                % (centre_code, len(centre)))
+            return
+        centre.write({'code': code})
+        # The name is translated: every language keeps its own wording of
+        # the centre, each followed by the person's name.
+        for lang in self.env['res.lang'].get_installed():
+            localised = centre.with_context(lang=lang[0])
+            localised.write({'name': '%s - %s' % (localised.name, employee.name)})
+        log("   recoded %s -> %s (%s) - recode it in Enterprise as well, then run the "
+            "cost centre and payroll synchronisation from 01.01" % (centre_code, code, centre.name))
 
     def _step_sheet_matches_ledger(self, log):
         """Give a posted line back the quantity its posting was made for.

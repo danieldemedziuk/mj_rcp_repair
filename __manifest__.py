@@ -1,6 +1,6 @@
 {
     'name': 'MJ RCP Repair (temporary)',
-    'version': '17.0.1.18.0',
+    'version': '17.0.1.19.0',
     'author': 'DSquare Net',
     'company': 'MJ Group Sp. z o.o.',
     'license': 'OPL-1',
