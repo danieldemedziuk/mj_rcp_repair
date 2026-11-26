@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_mj_efficiency_repair_form" model="ir.ui.view">
+        <field name="name">mj.efficiency.repair.form</field>
+        <field name="model">mj.efficiency.repair</field>
+        <field name="arch" type="xml">
+            <form string="Efficiency data repair">
+                <div class="alert alert-warning" role="alert">
+                    <strong>Take a database backup first.</strong>
+                    Run Preview, read the report, then Repair. Steps:
+                    1) corrections of postings RCP had already reversed,
+                    2) manual absence on days an approved leave covers,
+                    3) approved leaves without timesheet lines,
+                    4) timesheet lines detached from an approved sheet - put
+                    back on it, and their RCP weeks unlocked, recomputed,
+                    posted and locked again.
+                </div>
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="company_id"
+                               options="{'no_create': True, 'no_open': True}"/>
+                    </group>
+                </group>
+                <field name="output" nolabel="1" widget="text"
+                       class="font-monospace small"
+                       invisible="not output"/>
+                <footer>
+                    <button name="action_preview" type="object"
+                            string="Preview" class="btn-primary"/>
+                    <button name="action_repair" type="object"
+                            string="Repair" class="btn-secondary"
+                            confirm="This writes to the database and posts RCP corrections. Have you taken a backup and read the preview?"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_mj_efficiency_repair" model="ir.actions.act_window">
+        <field name="name">MJ Efficiency Data Repair</field>
+        <field name="res_model">mj.efficiency.repair</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Administrators only: the repair deletes timesheet lines and posts RCP. -->
+    <menuitem id="menu_mj_efficiency_repair"
+              name="MJ Efficiency Data Repair"
+              parent="base.menu_custom"
+              action="action_mj_efficiency_repair"
+              sequence="901"
+              groups="base.group_system"/>
+
+</odoo>

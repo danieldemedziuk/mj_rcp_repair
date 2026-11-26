@@ -1,6 +1,6 @@
 {
     'name': 'MJ RCP Repair (temporary)',
-    'version': '17.0.1.19.0',
+    'version': '17.0.1.20.0',
     'author': 'DSquare Net',
     'company': 'MJ Group Sp. z o.o.',
     'license': 'OPL-1',
@@ -31,10 +31,13 @@ themselves behind - which is the point.
         # signal for a project that must not absorb) lives here, and so
         # does the sheet-against-ledger view used to check the result.
         'mj_finance_core',
+        # The efficiency repair recreates leave timesheets the way core does.
+        'project_timesheet_holidays',
     ],
     'data': [
         'security/ir.model.access.csv',
         'views/mj_rcp_repair_views.xml',
+        'views/mj_efficiency_repair_views.xml',
     ],
     'installable': True,
     'application': False,

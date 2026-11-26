@@ -417,3 +417,256 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_rcp_repair_form
 msgid "This reverses postings and deletes RCP lines. Have you taken a backup?"
 msgstr "To stornuje księgowania i usuwa linie RCP. Czy masz kopię bazy?"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid ""
+"   %(date)s %(account)s %(amount).2f (%(employee)s), original %(original)s"
+msgstr ""
+"   %(date)s %(account)s %(amount).2f (%(employee)s), oryginał %(original)s"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "   %(name)s: %(hours).1f h"
+msgstr "   %(name)s: %(hours).1f h"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid ""
+"   %(week)s: %(count)s new lines, %(hours).1f h, %(value).2f zł%(errors)s"
+msgstr ""
+"   %(week)s: %(count)s nowych linii, %(hours).1f h, %(value).2f zł%(errors)s"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid ""
+"   RCP: %(count)s correction lines posted, %(value).2f zł, errors: "
+"%(errors)s"
+msgstr ""
+"   RCP: zaksięgowano %(count)s linii korygujących, %(value).2f zł, błędy: "
+"%(errors)s"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "   created: %(count)s lines, %(hours).1f h"
+msgstr "   utworzono: %(count)s linii, %(hours).1f h"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid ""
+"   left for HR - leave cancelled by hand, approved request still active: "
+"%(employee)s %(date)s %(hours).1f h"
+msgstr ""
+"   do wyjaśnienia przez HR - urlop odwołany ręcznie, a wniosek nadal "
+"zatwierdzony: %(employee)s %(date)s %(hours).1f h"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "   no internal (absence) project configured - skipped"
+msgstr "   brak projektu wewnętrznego (nieobecności) - pominięto"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "   re-attached: %(count)s lines, %(hours).1f h"
+msgstr "   dopięto: %(count)s linii, %(hours).1f h"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "   refused: %(count)s lines of %(employee)s: %(error)s"
+msgstr "   odrzucono: %(count)s linii (%(employee)s): %(error)s"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "   removed: %(count)s lines, %(hours).1f h"
+msgstr "   usunięto: %(count)s linii, %(hours).1f h"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "   removed: %s lines"
+msgstr "   usunięto: %s linii"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid ""
+"   skipped (project settled): %(employee)s %(date)s %(hours).1f h "
+"%(project)s"
+msgstr ""
+"   pominięto (projekt rozliczony): %(employee)s %(date)s %(hours).1f h "
+"%(project)s"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "   skipped: %s"
+msgstr "   pominięto: %s"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "%s (employee archived)"
+msgstr "%s (pracownik zarchiwizowany)"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "%s (no absence project/task)"
+msgstr "%s (brak projektu/zadania nieobecności)"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "1. Corrections of postings RCP reversed itself"
+msgstr "1. Korekty księgowań, które RCP samo wystornowało"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "2. Manual absence on days an approved leave already covers"
+msgstr "2. Ręczne nieobecności w dni objęte zatwierdzonym wnioskiem"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "3. Approved leaves without timesheet lines"
+msgstr "3. Zatwierdzone urlopy bez wpisów w kartach pracy"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "4. Timesheet lines detached from an approved sheet"
+msgstr "4. Wpisy odpięte od zatwierdzonych kart pracy"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_efficiency_repair_form
+msgid ""
+"<strong>Take a database backup first.</strong>\n"
+"                    Run Preview, read the report, then Repair. Steps:\n"
+"                    1) corrections of postings RCP had already reversed,\n"
+"                    2) manual absence on days an approved leave covers,\n"
+"                    3) approved leaves without timesheet lines,\n"
+"                    4) timesheet lines detached from an approved sheet - put\n"
+"                    back on it, and their RCP weeks unlocked, recomputed,\n"
+"                    posted and locked again."
+msgstr ""
+"<strong>Najpierw zrób kopię zapasową bazy.</strong>\n"
+"                    Uruchom Podgląd, przeczytaj raport, potem Napraw. Kroki:\n"
+"                    1) korekty księgowań, które RCP już wystornowało,\n"
+"                    2) ręczne nieobecności w dni objęte zatwierdzonym wnioskiem,\n"
+"                    3) zatwierdzone urlopy bez wpisów w kartach pracy,\n"
+"                    4) wpisy odpięte od zatwierdzonych kart - dopięte z powrotem,\n"
+"                    a ich tygodnie RCP odblokowane, przeliczone, zaksięgowane\n"
+"                    i ponownie zablokowane."
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "Company: %(company)s, period %(start)s - %(end)s"
+msgstr "Firma: %(company)s, okres %(start)s - %(end)s"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_efficiency_repair_form
+msgid "Efficiency data repair"
+msgstr "Naprawa danych Efektywności"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_efficiency_repair__date_from
+msgid "From"
+msgstr "Od"
+
+#. module: mj_rcp_repair
+#: model:ir.actions.act_window,name:mj_rcp_repair.action_mj_efficiency_repair
+#: model:ir.ui.menu,name:mj_rcp_repair.menu_mj_efficiency_repair
+msgid "MJ Efficiency Data Repair"
+msgstr "MJ Naprawa danych Efektywności"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "MODE: %s"
+msgstr "TRYB: %s"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "Only an administrator can run this repair."
+msgstr "Tę naprawę może uruchomić tylko administrator."
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "PREVIEW - nothing is kept"
+msgstr "PODGLĄD - nic nie zostaje zapisane"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "REPAIR"
+msgstr "NAPRAWA"
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_efficiency_repair_form
+msgid "Repair"
+msgstr "Napraw"
+
+#. module: mj_rcp_repair
+#. odoo-python
+#: code:addons/mj_rcp_repair/models/mj_efficiency_repair.py:0
+#, python-format
+msgid "The period starts after it ends."
+msgstr "Okres zaczyna się po swoim końcu."
+
+#. module: mj_rcp_repair
+#: model_terms:ir.ui.view,arch_db:mj_rcp_repair.view_mj_efficiency_repair_form
+msgid ""
+"This writes to the database and posts RCP corrections. Have you taken a "
+"backup and read the preview?"
+msgstr ""
+"To zapisuje zmiany w bazie i księguje korekty RCP. Czy zrobiono kopię "
+"zapasową i przeczytano podgląd?"
+
+#. module: mj_rcp_repair
+#: model:ir.model.fields,field_description:mj_rcp_repair.field_mj_efficiency_repair__date_to
+msgid "To"
+msgstr "Do"
+
+#. module: mj_rcp_repair
+#: model:ir.model,name:mj_rcp_repair.model_mj_efficiency_repair
+msgid "Workforce Efficiency data repair (one-off)"
+msgstr "Naprawa danych Efektywności pracowniczej (jednorazowa)"
